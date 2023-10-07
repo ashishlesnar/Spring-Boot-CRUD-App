@@ -28,6 +28,16 @@ public class StudentServiceImplementation implements IStudent{
 
     @Override
     @Transactional
+    public List<Student> saveStudent(List<Student> studentList) {
+        for(Student student : studentList) {
+            entityManager.persist(student);
+            System.out.println(student);
+        }
+        return studentList;
+    }
+
+    @Override
+    @Transactional
     public Student updateStudent(Student student, int id) {
         Student studenFromDB = entityManager.find(Student.class,id);
         studenFromDB.setFirstName(student.getFirstName());
@@ -35,7 +45,7 @@ public class StudentServiceImplementation implements IStudent{
         studenFromDB.setEmail(student.getEmail());
 
         // Update Student
-        entityManager.persist(studenFromDB);
+        entityManager.merge(studenFromDB);
         return studenFromDB;
     }
 
