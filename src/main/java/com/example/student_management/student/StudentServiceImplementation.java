@@ -23,7 +23,7 @@ public class StudentServiceImplementation implements IStudent{
     @Transactional
     public Student saveStudent(Student student) {
         entityManager.persist(student);
-        return null;
+        return student;
     }
 
     @Override
