@@ -22,16 +22,6 @@ public class StudentController {
         this.studentEntity = entity;
     }
 
-    @ExceptionHandler
-    public ResponseEntity<StudentErrorResponse> handleException(StudentNotFoundException exception) {
-        StudentErrorResponse response = new StudentErrorResponse();
-        response.setStatus(HttpStatus.NOT_FOUND.value());
-        response.setMessage(exception.getMessage());
-        response.setTimestamp(new Timestamp(System.currentTimeMillis()));
-
-        return new ResponseEntity<>(response,HttpStatus.NOT_FOUND);
-    }
-
     @PostMapping("/create")
     public CommonResponse<Student> saveStudent(@RequestBody Student student) {
         CommonResponse<Student> commonResponse = new CommonResponse<>();
