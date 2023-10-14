@@ -1,14 +1,9 @@
 package com.example.student_management.student;
 
 import com.example.student_management.common.CommonResponse;
-import com.example.student_management.exceptions.StudentErrorResponse;
-import com.example.student_management.exceptions.StudentNotFoundException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.sql.Timestamp;
 import java.util.List;
 
 @CrossOrigin
@@ -41,10 +36,18 @@ public class StudentController {
     public CommonResponse<Student> updateStudent(@RequestBody Student student, @PathVariable("id") int id) {
         CommonResponse<Student> commonResponse = new CommonResponse<>();
         try {
-            Student response = studentEntity.updateStudent(student,id);
-            commonResponse.setStatusCode(200);
-            commonResponse.setResponseMessage("Student Updated Successfully");
-            commonResponse.setResponseObject(response);
+            Student studentResponse = studentEntity.updateStudent(student,id);
+
+            if (!ObjectUtils.isEmpty(studentResponse)) {
+                commonResponse.setStatusCode(200);
+                commonResponse.setResponseMessage("Student Updated Successfully");
+                commonResponse.setResponseObject(studentResponse);
+            } else {
+                commonResponse.setStatusCode(404);
+                commonResponse.setResponseMessage("Student Not Found!");
+                commonResponse.setResponseObject(studentResponse);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -56,10 +59,18 @@ public class StudentController {
     public CommonResponse<Student> deleteStudent(@PathVariable("id") int id) {
         CommonResponse<Student> commonResponse = new CommonResponse<>();
         try {
-            Student response = studentEntity.deleteStudent(id);
-            commonResponse.setStatusCode(200);
-            commonResponse.setResponseMessage("Student Deleted Successfully");
-            commonResponse.setResponseObject(response);
+            Student student = studentEntity.deleteStudent(id);
+            if (!ObjectUtils.isEmpty(student)) {
+                commonResponse.setStatusCode(200);
+                commonResponse.setResponseMessage("Student Deleted Successfully");
+                commonResponse.setResponseObject(student);
+            }
+            else {
+                commonResponse.setStatusCode(404);
+                commonResponse.setResponseMessage("Student Not Found!");
+                commonResponse.setResponseObject(student);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -75,7 +86,7 @@ public class StudentController {
             if (ObjectUtils.isEmpty(response)) {
                 commonResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
                 commonResponse.setResponseMessage("Student Not Found With Id : " + id);
-                commonResponse.setResponseObject(null);
+                commonResponse.setResponseObject(response);
             }else {
                 commonResponse.setStatusCode(200);
                 commonResponse.setResponseMessage("Student Found Successfully");

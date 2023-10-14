@@ -1,28 +1,31 @@
 package com.example.student_management.student;
 
+import com.example.student_management.repository.StudentRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
-@Repository
-public class StudentServiceImplementation implements IStudent{
+@Service
+public class StudentServiceImplementation implements IStudent {
 
     // Inject EntityManager
+    private StudentRepository studentRepository;
     private EntityManager entityManager;
-
     @Autowired
-    public StudentServiceImplementation(EntityManager theManager) {
-        this.entityManager = theManager;
+    public StudentServiceImplementation(StudentRepository repository, EntityManager manager) {
+        this.studentRepository = repository;
+        this.entityManager = manager;
     }
 
     @Override
     @Transactional
     public Student saveStudent(Student student) {
-        entityManager.persist(student);
+        studentRepository.save(student);
         return student;
     }
 
@@ -30,7 +33,7 @@ public class StudentServiceImplementation implements IStudent{
     @Transactional
     public List<Student> saveStudent(List<Student> studentList) {
         for(Student student : studentList) {
-            entityManager.persist(student);
+            studentRepository.save(student);
             System.out.println(student);
         }
         return studentList;
@@ -39,41 +42,50 @@ public class StudentServiceImplementation implements IStudent{
     @Override
     @Transactional
     public Student updateStudent(Student student, int id) {
-        Student studenFromDB = entityManager.find(Student.class,id);
-        studenFromDB.setFirstName(student.getFirstName());
-        studenFromDB.setLastName(student.getLastName());
-        studenFromDB.setEmail(student.getEmail());
+        Optional<Student> studenFromDB = studentRepository.findById(id);
+        Student updatedStudent = null;
+        if (studenFromDB.isPresent()) {
+            updatedStudent = studenFromDB.get();
+            updatedStudent.setFirstName(student.getFirstName());
+            updatedStudent.setLastName(student.getLastName());
+            updatedStudent.setEmail(student.getEmail());
 
-        // Update Student
-        entityManager.merge(studenFromDB);
-        return studenFromDB;
+            // Update Student
+            studentRepository.save(updatedStudent);
+        }
+
+        return updatedStudent;
     }
 
     @Override
     @Transactional
     public Student deleteStudent(int id) {
-        Student student = entityManager.find(Student.class,id);
-        entityManager.remove(student);
-        return student;
+        Optional<Student> student = studentRepository.findById(id);
+        Student studentResponse = null;
+        if (student.isPresent()) {
+            studentResponse = student.get();
+            studentRepository.deleteById(id);
+        }
+        return studentResponse;
     }
 
     @Override
     public Student getStudentById(int id) {
-        Student student = entityManager.find(Student.class,id);
+        Optional<Student> student = studentRepository.findById(id);
+        if (student.isPresent()) {
+            return student.get();
+        }
         System.out.println(student);
-        return student;
+        return null;
     }
 
     @Override
     public List<Student> getListOfStudents() {
-        TypedQuery<Student> query = entityManager.createQuery("SELECT s FROM Student s", Student.class);
-        List<Student> students = query.getResultList();
-
-        for(Student student : students) {
-            System.out.println(student);
+        List<Student> students = studentRepository.findAll();
+        if (!students.isEmpty()) {
+            return students;
         }
-
-        return students;
+        return null;
     }
 
     @Override
